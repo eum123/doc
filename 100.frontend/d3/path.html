@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<meta charset='utf-8'>
+<script src='http://d3js.org/d3.v3.min.js'></script>
+<body>
+<script>
+
+  var svg = d3.select('body').append('svg')
+    .attr('width', 300)
+    .attr('height', 300);
+
+
+  var path = svg
+    
+    .append('path')
+  
+      .attr('d', function(d,i){ return 'M100,100L100,200L200,200L200,100Z' })
+      .attr("stroke", "red")
+      .attr('stroke-width', 5)
+      .attr('stroke-linecap', 'round')
+      .attr('marker-end', function(d,i){ return 'url(#marker_a)' });
+
+
+
+</script>
+</body>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis line,
+.axis path {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+</style>
+<body>
+<script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>
+<script>
+
+var margin = {top: 250, right: 40, bottom: 250, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+     var startDate = new Date(2017, 3, 10, 14, 50, 0);
+     var intervalMinute = 1;
+    // endDate = new Date(2017, 3, 10, 15, 0, 1);
+
+    //endDate = new Date();
+    //startDate = new Date(Date.parse(endDate) - 1000 * 60)
+    
+
+     var now = new Date();
+     startDate = new Date((new Date()).setMinutes(now.getMinutes() - intervalMinute));
+     // var sDate = new Date(now - 1000 *600);
+     // startDate = new Date(sDate.getFullYear(), sDate.getMonth(), sDate.getDate(), sDate.getHours(), sDate.getMinutes(), sDate.getSeconds(),0);
+
+    // endDate =  new Date(parseInt(now.getFullYear()), parseInt(now.getMonth()), parseInt(now.getDate()), parseInt(now.getHours()), parseInt(now.getMinutes()), now.getSeconds(),0);
+
+    //endDate =  new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds(),1);
+    endDate = now;
+
+
+  
+
+var x = d3.time.scale()
+    .domain([startDate, endDate])
+    .range([0, width]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .tickValues(d3.range(startDate, endDate, 999)
+                  .map(function(d){ return new Date(d) })
+    )
+    .tickFormat(d3.time.format("%H:%M"));
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+svg.append("g")
+    .attr("id", "xaxis")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis)
+  .selectAll("text")
+    .attr("class", "xaxis_lable")
+    .attr("y", 0)
+    .attr("x", 9)
+    .attr("dy", ".35em")
+    .attr("transform", "rotate(90)")
+    .style("text-anchor", "start");
+
+
+
+var interval = setInterval(function() {
+  
+//    var now = new Date();
+//      startDate = new Date((new Date()).setMinutes(now.getMinutes() - intervalMinute));
+//      endDate = now;
+// console.log(now);
+//   x.domain([startDate, endDate]);
+
+   //d3.select("#xaxis").transition().duration(1000).ease("linear").call(xAxis);
+
+   d3.selectAll(".xaxis_lable")
+   .transition().duration(1000)
+   .text(function(d){
+      var format = d3.time.format("%H:%M");
+     return format(new Date(d.setSeconds(d.getSeconds() + 1)));
+   });
+
+   
+
+  // d3.selectAll(".xaxis_lable").text(function(d){
+  //   return new Date(d) 
+  // });
+
+   //  d3.select(".axis").transition().duration(1000).call(xAxis);
+     // .selectAll("text")
+     //      // .attr("y", 0)
+     //      // .attr("x", 9)
+     //      //.attr("dy", ".35em")
+     //      .attr("transform", "rotate(90)");
+
+  
+
+}, 1000);
+</script>

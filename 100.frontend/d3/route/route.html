@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<meta charset='utf-8'>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<body>
+<script>
+
+var WIDTH = 800;
+var HEIGHT = 500;
+var RECT_WIDTH = 150;	//넓이
+var RECT_HEIGHT = 150;	//높이
+var STROKE_WIDTH=2;	//테두리를 그리기 위해 두 사각형의 차이를 설정
+var group_data = [{x:0, y:0}];
+var data = [{x:0, y:0, width:RECT_WIDTH, height:RECT_HEIGHT, color:"green"},
+		{x:0 + STROKE_WIDTH, y:0 + STROKE_WIDTH, width:RECT_WIDTH-(STROKE_WIDTH*2), height:RECT_HEIGHT - (STROKE_WIDTH*2), color:"white"}];
+
+// g 를 drag 시 동작하는 기능 정의0
+var group_drag = d3.drag()
+        .on("drag", function(d,i) {   
+        	
+        	d.x += d3.event.dx;
+        	d.y += d3.event.dy;
+        	
+            d3.select(this).attr("transform", function(d,i){
+                return "translate(" + [ d.x,d.y ] + ")"
+            })
+        });
+
+// var drag = d3.behavior.drag()
+//         .on("drag", function(d,i) {        	
+//             d.x += d3.event.dx
+//             d.y += d3.event.dy
+//             d3.select(this).attr("transform", function(d,i){
+//                 return "translate(" + [ d.x,d.y ] + ")"
+//             })
+//         });
+
+
+var line;
+
+var svg = d3.select("body").append("svg")
+	.attr("width", WIDTH)
+   	.attr("height", 500)
+   	.on("mousedown", mousedown)
+    	.on("mouseup", mouseup);
+
+ function mousedown() {
+    var m = d3.mouse(this);
+    line = svg.append("line")
+        .attr("x1", m[0])
+        .attr("y1", m[1])
+        .attr("x2", m[0])
+        .attr("y2", m[1]);
+    
+    svg.on("mousemove", mousemove);
+}
+
+function mousemove() {
+    var m = d3.mouse(this);
+    line.attr("x2", m[0])
+        .attr("y2", m[1]);
+}
+
+function mouseup() {
+    svg.on("mousemove", null);
+}
+
+var g = svg.selectAll("g").data(group_data).enter().append("g")
+   		.attr("id", "from")
+   		.attr("x", function(d){
+   			return d.x;
+   		})
+   		.attr("y", function(d) {
+   			return d.y;
+   		})
+   		.call(group_drag);
+
+var rect =g.selectAll("rect")
+   	.data(data).enter()
+		.append("rect")
+	   		.attr("x", function(d) {
+	   			return d.x;
+	   		})
+	   		.attr("y", function(d) {
+	   			return d.y;
+	   		})
+	   		.attr("width", function(d){
+	   			return d.width;
+	   		})
+	   		.attr("height", function(d){
+	   			return d.height;
+	   		})
+	   		.attr("fill", function(d){
+	   			return d.color;
+	   		})
+	   		.attr("rx", 10)
+	   		.attr("ry", 10);
+ 
+
+var image = d3.select("#from")
+	.append("image")
+		.attr("x", STROKE_WIDTH * 3)
+		.attr("y", STROKE_WIDTH * 3)
+		.attr("width", 30)
+		.attr("height", 30)
+		.attr("xlink:href", "https://avatars0.githubusercontent.com/u/24262309?v=3&s=40");
+
+
+var text = d3.select("#from")
+   	.append("text")
+			.attr("x", RECT_WIDTH/2)
+			.attr("y", 60)
+			.text("from")
+				.attr("font-size", "20px")
+				.attr("fill", "blue")
+				.style("text-anchor", "middle")	//중앙 정렬
+	;
+
+
+var textarea = d3.select("#from")
+	.append("foreignObject")
+		.attr("x", 5)
+		.attr("y", RECT_HEIGHT/2)
+		.append("xhtml:body")
+		.attr('xmlns','http://www.w3.org/1999/xhtml')
+		.append('textarea')
+			.attr("rows", 4)
+			.attr("cols", 17)
+			.style("font-size" , "12px");
+
+
+ 
+
+</script>
+	<input type="button" value="add" >
+</body>

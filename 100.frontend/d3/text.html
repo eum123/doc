@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<meta charset='utf-8'>
+<script src='http://d3js.org/d3.v3.min.js'></script>
+<body>
+<script>
+
+
+var svgContainer = d3.select("body").append("svg")
+                                      .attr("width",300)
+                                      .attr("height",200);
+
+  //Add the SVG Text Element to the svgContainer
+var text = svgContainer
+                        .append("text")
+                        .attr("x", 100)
+                        .attr("y", 100)
+                        .text("text content")
+                        .attr("font-family", "sans-serif")
+                       .attr("font-size", "20px")
+                       .attr("fill", "red");
+
+</script>
+</body>

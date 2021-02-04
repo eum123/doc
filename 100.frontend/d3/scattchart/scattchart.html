@@ -1,0 +1,215 @@
+ <!DOCTYPE html>
+    <html>
+      <head>
+        <title>The d3 test</title>
+<style>
+.chart {
+
+}
+
+.main text {
+    font: 10px sans-serif;	
+}
+
+.axis line, .axis path {
+    shape-rendering: crispEdges;
+    stroke: black;
+    fill: none;
+}
+
+circle {
+    fill: steelblue;
+}
+
+</style>
+        <script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>
+      </head>
+      <body>
+        <div class='content'>
+          <!-- /the chart goes here -->
+        </div>
+        <!--<script type="text/javascript" src="scatterchart.js"></script>-->
+      </body>
+    </html>
+	<script>
+
+
+      //index, x, y
+    var data = [];
+    var circle_index=0;
+     var intervalMinute = 10;
+     var xaxis_lable_pattern = "%H:%M";
+
+    ///////////////////////svg///////////////////////
+
+     var margin = {top: 20, right: 15, bottom: 60, left: 60}
+      , width = 600 - margin.left - margin.right
+      , height = 250 - margin.top - margin.bottom;
+
+     var chart = d3.select('body')
+    .append('svg:svg')
+    .attr('width', width + margin.right + margin.left)
+    .attr('height', height + margin.top + margin.bottom)
+    .attr('class', 'chart')
+
+      var main = chart.append('g')
+    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+    .attr('width', width)
+    .attr('height', height)
+    .attr('class', 'main');
+
+    ////////////////////////////////////////////////////
+  
+    ////////////////x axis/////////////////////////////
+    var endDate = new Date();
+    var startDate = new Date((new Date()).setMinutes(endDate.getMinutes() - intervalMinute)),
+    millisecondsBetweenTicks = 999 * 10 * 6; // 1 minutes
+    
+    //var x = d3.scale.linear().domain([0, 600]).range([ 0, width ]);
+    var x = d3.time.scale().domain([startDate, endDate]).range([ 0, width ]);
+    
+    var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient('bottom')
+      .tickValues(d3.range(startDate, endDate, millisecondsBetweenTicks)
+                      .map(function(d){ return new Date(d) })
+        )
+        .tickFormat(d3.time.format(xaxis_lable_pattern));
+      
+
+    main.append('text').attr('class', 'label').attr('x', width/2)
+        .attr('y',  height + margin.bottom - margin.top).attr('text-anchor', 'middle');
+        
+
+    var svgXaxis = main.append('g')
+  .attr('transform', 'translate(0,' + height + ')')
+  .attr('class', 'main axis date')
+  .call(xAxis)
+      .selectAll("text")
+          .attr("class", "xaxis_lable")
+          .attr("y", 0)
+          .attr("x", 15)
+          .attr("dy", ".35em")
+          .attr("transform", "rotate(90)");
+
+    ///////////////////////////////////////////
+
+    ///////////////////y axis ////////////////
+    var y = d3.scale.linear().domain([0, 100]).range([height, 0 ]);
+
+
+    // draw the y axis
+    var yAxis = d3.svg.axis()
+	.scale(y)
+	.orient('left');
+
+    main.append('g')
+	.attr('transform', 'translate(0,0)')
+	.attr('class', 'main axis date')
+	.call(yAxis);
+
+    /////////////////////////////////////////////////
+
+    var g = main.append("svg:g"); 
+    g.selectAll("scatter-dots")
+      .data(data)
+      .enter().append("svg:circle")
+          .attr("id", function(d){ return "cicle_index_" + d[0]})
+          .attr("cx", function (d,i) { return x(d[1]); } )
+          .attr("cy", function (d) { return y(d[2]); } )
+          .attr("yvalue", function (d) { return d[2]; } )
+          .attr("r", 3);
+
+
+
+function update() {
+
+  // update the scales' domain
+  // x.domain([0, d3.max(data, function(d) { return d[0]; })]);
+  // y.domain([0, d3.max(data, function(d) { return d[1]; })]);
+
+
+   // var dot = g.selectAll("circle")
+   //    .data(data, function(d) {console.log(d); return d[0]});
+   var dot = g.selectAll("circle").data(data);
+  
+
+
+   // udpate
+  dot.transition()
+      .duration(750)
+      .attr("cx", function (d, i) { 
+          var date = new Date(d[1]);
+
+          var diff = (new Date() - date) / 1000;
+          
+          if(diff >= intervalMinute * 60) {
+           var circle = d3.select(this);
+            circle.attr("id", "remove");
+
+            d3.selectAll("#remove").remove();
+            data.shift();
+            return x(d[1]);
+          }
+          d[1] = d[1]-1000; 
+
+          return x(d[1]); 
+        } 
+       )
+      .attr("r", 3);
+
+ //enter
+  dot.enter().append("circle")
+      .attr({
+        "id": function(d) { return "cicle_index_" + d[0]; }
+      , "cx": function(d) { 
+          return x(d[1]); }
+      , "cy": function(d) { return y(d[2]); }
+      , "yvalue":function(d) {return d[2];}
+      , "r": 3
+      })
+     .transition().duration(750);
+
+
+    redrawXaxis();
+
+    dot.exit().transition().duration(750).remove();
+
+}
+
+function redrawXaxis() {
+   var now = new Date();
+     startDate = new Date((new Date()).setMinutes(now.getMinutes() - intervalMinute));
+     
+    x.domain([startDate, now]);
+
+    d3.selectAll(".xaxis_lable")
+   .transition().duration(750)
+   .text(function(d){
+      var format = d3.time.format(xaxis_lable_pattern);
+     return format(new Date(d.setSeconds(d.getSeconds() + 1)));
+   });
+}
+
+function click() {
+ 
+  data.push(generateDatum());
+
+    update();
+}
+
+var interval = setInterval(function() {
+  
+  data.push(generateDatum());
+
+    update();
+
+}, 1000);
+
+
+
+function generateDatum () {
+
+  return [circle_index++, new Date(), parseInt(Math.random() * 100)];
+}
+	</script>
